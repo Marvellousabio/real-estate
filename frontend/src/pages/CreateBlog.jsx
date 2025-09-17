@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Upload } from "lucide-react";
 
+
 const CreateBlog = () => {
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
@@ -17,7 +18,8 @@ const CreateBlog = () => {
     formData.append("excerpt", excerpt);
     formData.append("content", content);
     formData.append("image", image);
-
+    
+    
     try {
       const res = await axios.post("/api/blogs", formData, {
         headers: { "Content-Type": "multipart/form-data" },

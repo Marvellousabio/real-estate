@@ -1,6 +1,6 @@
 // routes/blogRoutes.js
 import express from "express";
-import Blog from "../model/blog.js";
+import Blog from "../model/Blog.js";
 import { upload } from "../config/storage.js";
 
 const blogRouter = express.Router();
@@ -28,6 +28,7 @@ blogRouter.get("/:id", async (req, res) => {
 
 // Add new blog (Admin use)
 blogRouter.post("/", upload.single("image"), async (req, res) => {
+
   try {
     const newBlog = new Blog({
       title: req.body.title,
@@ -42,5 +43,40 @@ blogRouter.post("/", upload.single("image"), async (req, res) => {
     res.status(500).json({ error: "Failed to create blog" });
   }
 });
+
+// Update blog
+blogRouter.put("/:id", upload.single("image"), async (req, res) => {
+  try {
+    const updatedBlog = await Blog.findByIdAndUpdate(
+      req.params.id,
+      {
+        title: req.body.title,
+        excerpt: req.body.excerpt,
+        content: req.body.content,
+        image: req.file ? req.file.path : undefined, // keep old image if none uploaded
+      },
+      { new: true } // return updated document
+    );
+
+    if (!updatedBlog) return res.status(404).json({ error: "Blog not found" });
+    res.json(updatedBlog);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to update blog" });
+  }
+});
+
+// Delete blog
+blogRouter.delete("/:id", async (req, res) => {
+  try {
+    const deletedBlog = await Blog.findByIdAndDelete(req.params.id);
+    if (!deletedBlog) return res.status(404).json({ error: "Blog not found" });
+    res.json({ message: "Blog deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to delete blog" });
+  }
+});
+
 
 export default blogRouter;
