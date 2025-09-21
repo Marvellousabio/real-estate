@@ -30,7 +30,7 @@ const App = () => {
           <Route path="/contact" element={<Contact />} />
           <Route path='all-properties' element={<AllProperites/>}/>
           <Route path="/add-property" element={<AddProperty />} />
-          <Route path="*" element={<h1>404 - Page Not Found</h1>} />
+          <Route path="*" element={<h1 className="mt-20 p-6">404 - Page Not Found</h1>} />
         </Routes>
       <Footer className="bottom-0 fixed mb-0" />
     </Router>

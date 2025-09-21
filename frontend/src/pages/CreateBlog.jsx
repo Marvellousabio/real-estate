@@ -146,7 +146,7 @@ const CreateBlog = () => {
         <button
           type="submit"
           disabled={uploading}
-          className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-60"
+          className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 disabled:opacity-60"
         >
           {uploading ? "Publishing..." : "Publish Blog"}
         </button>

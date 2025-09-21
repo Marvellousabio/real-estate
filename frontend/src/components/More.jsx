@@ -1,28 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { MdArrowOutward } from "react-icons/md";
 import { motion } from "framer-motion";
 import { fadeIn } from "../utils/animate";
 import { useNavigate } from "react-router-dom";
-import { getBlogs } from "../services/api"; // ✅ use API helper
+import { getBlogs } from "../services/api"; 
+import { useQuery } from "@tanstack/react-query";
 
 const More = () => {
   const navigate = useNavigate();
-  const [blogs, setBlogs] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchBlogs = async () => {
-      try {
-        const data = await getBlogs(); // ✅ use helper
-        setBlogs(data);
-      } catch (err) {
-        console.error("Error fetching blogs:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchBlogs();
-  }, []);
+  // ✅ useQuery handles fetching, caching, retries
+  const { data: blogs = [], isLoading, isError } = useQuery({
+    queryKey: ["blogs"],
+    queryFn: getBlogs,
+    staleTime: 5 * 60 * 1000, // cache for 5 minutes
+  });
 
   const handlePostClick = (id) => {
     navigate(`/blog/${id}`);
@@ -49,8 +41,10 @@ const More = () => {
         </motion.div>
 
         {/* Blog Grid */}
-        {loading ? (
+        {isLoading ? (
           <p className="text-center text-gray-500">Loading blogs...</p>
+        ) : isError ? (
+          <p className="text-center text-red-500">Failed to load blogs.</p>
         ) : blogs.length === 0 ? (
           <p className="text-center text-gray-500">
             No blogs available at the moment.
