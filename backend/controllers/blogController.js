@@ -24,6 +24,8 @@ export const getBlogById = async (req, res, next) => {
 // Create blog
 export const createBlog = async (req, res, next) => {
   try {
+    console.log("📥 Incoming blog data:", req.body);
+    console.log("📸 File info:", req.file);
     if (!req.body.title || !req.body.content) {
       return res.status(400).json({ error: "Title and content are required" });
     }

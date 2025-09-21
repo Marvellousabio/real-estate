@@ -26,7 +26,7 @@ export const getProperties = async (filters = {}) => {
 // Blogs
 export const createBlog = (blogData) =>
   API.post("/blog", blogData, {
-    headers: { "Content-Type": "multipart/form-data" },
+    headers: { "Content-Type": undefined },
   });
 
 export const getBlogs = async () => {
