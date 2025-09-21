@@ -14,6 +14,7 @@ import blogRouter from "./routes/blogRouter.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 const app = express();
+app.use(compression()); 
 
 // ---------- Middleware ----------
 app.use(cors({
@@ -25,18 +26,16 @@ app.use(cors({
 }));
 
 app.use(express.json());
-app.use(compression());   // gzip responses
+  
 app.use(helmet());        // security headers
 app.use(morgan("dev"));   // request logging
 app.use(timeout("30s"));  // request timeout
 
+mongoose.set("strictQuery", true); 
 // ---------- DB Connection ----------
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(process.env.MONGO_URL);
     console.log("✅ MongoDB connected");
   } catch (err) {
     console.error("❌ MongoDB connection failed:", err.message);
@@ -46,6 +45,10 @@ const connectDB = async () => {
 connectDB();
 
 // ---------- Routes ----------
+app.get("/", (req, res) => {
+  res.json({ message: "API is running 🚀" });
+});
+
 app.use("/api/properties", route);
 app.use("/api/blog", blogRouter);
 
