@@ -68,8 +68,9 @@ const More = () => {
                 />
                 <div className="p-6">
                   <p className="text-sm text-[var(--text-dark)] opacity-70 mb-2">
-                    {new Date(post.date).toDateString()}
+                    {post.createdAt ? new Date(post.createdAt).toDateString() : "No date"}
                   </p>
+
                   <h2 className="text-xl font-semibold text-[var(--primary)] mb-3 truncate">
                     {post.title}
                   </h2>
