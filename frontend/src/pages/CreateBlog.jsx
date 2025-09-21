@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { Upload } from "lucide-react";
-
+import { createBlog } from "../services/api"; // ✅ centralized API functions
 
 const CreateBlog = () => {
   const [title, setTitle] = useState("");
@@ -9,32 +8,47 @@ const CreateBlog = () => {
   const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
-  const [uploading,setUploading]=useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [message, setMessage] = useState("");
 
+  // handle image preview
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImage(file);
+      const objectUrl = URL.createObjectURL(file);
+      setPreview(objectUrl);
+    }
+  };
+
+  // handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setUploading(true);
+    setMessage("");
+
     const formData = new FormData();
     formData.append("title", title);
     formData.append("excerpt", excerpt);
     formData.append("content", content);
-    formData.append("image", image);
-    
-    
+    if (image) formData.append("image", image);
+
     try {
-      const res = await axios.post("/api/blogs", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      console.log("Blog created:", res.data);
+      const res = await createBlog(formData);
+      console.log("Blog created:", res);
 
       // Reset
       setTitle("");
       setExcerpt("");
       setContent("");
       setImage(null);
+      if (preview) URL.revokeObjectURL(preview);
       setPreview(null);
-        setUploading(false);
+      setMessage("✅ Blog published successfully!");
     } catch (err) {
       console.error("Error creating blog:", err);
+      setMessage("❌ Failed to publish blog. Please try again.");
+    } finally {
       setUploading(false);
     }
   };
@@ -48,6 +62,16 @@ const CreateBlog = () => {
         <h2 className="text-2xl font-bold text-gray-800 text-center">
           ✍️ Create a New Blog
         </h2>
+
+        {message && (
+          <p
+            className={`text-center font-medium text-sm mb-4 ${
+              message.includes("✅") ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {message}
+          </p>
+        )}
 
         {/* Blog Title */}
         <div>
@@ -88,57 +112,43 @@ const CreateBlog = () => {
             placeholder="Write your blog content here..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full border rounded-lg px-4 py-2 h-48 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
+            className="w-full border rounded-lg px-4 py-2 h-48 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             required
           />
         </div>
 
-        {/* Blog Image Upload (styled like property upload) */}
+        {/* Image Upload */}
         <div>
           <label className="block text-gray-700 font-medium mb-2">
-            Blog Cover Image
+            Upload Image
           </label>
-
-          <div
-            className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 transition"
-            onClick={() => document.getElementById("blogImageInput").click()}
-          >
-            {preview ? (
+          <div className="flex items-center gap-4">
+            <label className="flex items-center justify-center gap-2 px-4 py-2 border rounded-lg cursor-pointer bg-gray-100 hover:bg-gray-200">
+              <Upload size={18} /> Upload
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageChange}
+              />
+            </label>
+            {preview && (
               <img
                 src={preview}
                 alt="Preview"
-                className="w-full h-64 object-cover rounded-lg"
+                className="h-16 w-16 object-cover rounded-lg border"
               />
-            ) : (
-              <>
-                <Upload className="w-12 h-12 text-gray-400 mb-3" />
-                <p className="text-gray-600">Click to upload cover image</p>
-                <p className="text-sm text-gray-400">(JPEG, PNG, etc.)</p>
-              </>
             )}
           </div>
-
-          <input
-            type="file"
-            id="blogImageInput"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files[0];
-              setImage(file);
-              setPreview(URL.createObjectURL(file));
-            }}
-            required
-          />
         </div>
 
-        {/* Submit Button */}
+        {/* Submit */}
         <button
           type="submit"
-          disabled = {uploading}
-          className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg shadow hover:bg-blue-700 transition"
-        >{uploading ? "Uploading..." : "🚀 Publish Blog"}
-          
+          disabled={uploading}
+          className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-60"
+        >
+          {uploading ? "Publishing..." : "Publish Blog"}
         </button>
       </form>
     </div>

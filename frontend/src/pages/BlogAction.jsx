@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { updateBlog, deleteBlog, getBlogById } from "../api";
+import { updateBlog, deleteBlog, getBlogById } from "../services/api";
 
 const BlogActions = () => {
   const { id } = useParams();

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getBlogById } from "../api"; // adjust path if needed
+import { getBlogById } from "../services/api"; // adjust path if needed
 
 const BlogDetails = () => {
   const { id } = useParams();

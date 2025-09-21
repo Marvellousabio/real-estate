@@ -3,7 +3,7 @@ import { MdArrowOutward } from "react-icons/md";
 import { motion } from "framer-motion";
 import { fadeIn } from "../utils/animate";
 import { useNavigate } from "react-router-dom";
-import { getBlogs } from "../api"; // ✅ use API helper
+import { getBlogs } from "../services/api"; // ✅ use API helper
 
 const More = () => {
   const navigate = useNavigate();
