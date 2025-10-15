@@ -1,0 +1,103 @@
+@import 'tailwindcss';
+
+
+:root {
+  --white:#ffffff;
+  --black:#333333;
+  --dark-gray:#2b2d42;
+  --light-gray:#f5f6f5;
+  --gold: #D4AF37;
+  --accent: #D4AF37; 
+  --shadow: rgba(0, 0, 0, 0.1);
+  
+ 
+  --primary: #256F46;    
+  --secondary: #B68628;  
+   
+  --hover-secondary: #056b2c; 
+  --white: #ffffff;    
+  
+  
+
+}
+
+.setActiveSection{
+  color: #d4af37;
+}
+#about {
+  scroll-margin-top: 20px; /* For smooth scrolling */
+}
+
+img {
+  transition: transform 0.3s ease-in-out;
+}
+
+img:hover {
+  transform: scale(1.02); /* Subtle zoom on hover */
+}
+
+.react-tabs {
+  -webkit-tap-highlight-color: transparent;
+  text-align: center;
+  margin-top: 20px;
+  
+}
+
+.react-tabs__tab-list {
+  justify-content: center;
+  
+}
+
+.react-tabs__tab {
+  display: inline-block;
+  border-radius: 50px ;
+  transition: all;
+  background-color: #ddcfcf;
+  border-bottom: none;
+  bottom: -1px;
+  position: relative;
+  list-style: none;
+  padding: 9px 20px;
+  cursor: pointer;
+}
+
+
+.react-tabs__tab--selected {
+  background: rgb(167, 120, 2);
+  color: white;
+  border-radius: 50 ;
+  
+
+}
+.react-tabs__tab:hover {
+  background-color: #ebdada;
+}
+
+.react-tabs__tab--disabled {
+  
+  color: GrayText;
+  cursor: default;
+}
+
+.react-tabs__tab:focus {
+  outline: none;
+}
+
+.react-tabs__tab:focus:after {
+  content: '';
+  position: absolute;
+  height: 5px;
+  left: -4px;
+  right: -4px;
+  bottom: -5px;
+  background: #fff;
+}
+
+.react-tabs__tab-panel {
+  display: none;
+}
+
+.react-tabs__tab-panel--selected {
+  display: block;
+  margin-top: 20px;
+}
