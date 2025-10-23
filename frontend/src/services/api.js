@@ -60,7 +60,9 @@ API.interceptors.response.use(
 // Properties API
 export const propertyAPI = {
   create: async (propertyData) => {
-    const response = await API.post("/properties", propertyData);
+    const response = await API.post("/properties", propertyData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return response.data;
   },
 

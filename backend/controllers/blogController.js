@@ -42,15 +42,28 @@ export const getBlogById = async (req, res, next) => {
 // Create new blog
 export const createBlog = async (req, res, next) => {
   try {
+    console.log("createBlog called with req.body:", req.body);
+    console.log("req.user:", req.user);
+    console.log("req.file:", req.file);
+
     const { title, excerpt, content } = req.body;
 
     // Validation
     if (!title?.trim() || !content?.trim()) {
+      console.log("Validation failed: title or content missing");
       return res.status(400).json({
         success: false,
         error: "Title and content are required"
       });
     }
+
+    console.log("Creating new blog with data:", {
+      title: title.trim(),
+      excerpt: excerpt?.trim() || "",
+      content: content.trim(),
+      image: req.file?.path || "",
+      author: req.user._id
+    });
 
     const newBlog = new Blog({
       title: title.trim(),
@@ -60,8 +73,13 @@ export const createBlog = async (req, res, next) => {
       author: req.user._id // Associate with authenticated user
     });
 
+    console.log("Saving blog...");
     const savedBlog = await newBlog.save();
+    console.log("Blog saved successfully:", savedBlog._id);
+
+    console.log("Populating author...");
     await savedBlog.populate('author', 'name email');
+    console.log("Author populated successfully");
 
     res.status(201).json({
       success: true,
@@ -69,6 +87,9 @@ export const createBlog = async (req, res, next) => {
       data: savedBlog
     });
   } catch (error) {
+    console.log("Error in createBlog:", error);
+    console.log("Error type:", typeof error);
+    console.log("Error properties:", Object.keys(error));
     next(error);
   }
 };

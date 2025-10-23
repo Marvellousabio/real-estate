@@ -25,12 +25,12 @@ export const AuthProvider = ({ children }) => {
     staleTime: 5 * 60 * 1000, // 5 minutes
     enabled: !!localStorage.getItem("authToken"), // Only run if token exists
     onError: () => {
-      // Clear invalid token
+      // Clear invalid token on auth errors
       localStorage.removeItem("authToken");
       setUser(null);
     },
     onSuccess: (data) => {
-      setUser(data.data.user);
+      setUser(data?.data?.user);
     },
   });
 
@@ -42,26 +42,40 @@ export const AuthProvider = ({ children }) => {
 
   // Login function
   const login = async (credentials) => {
-    const response = await authAPI.login(credentials);
-    localStorage.setItem("authToken", response.data.token);
-    setUser(response.data.user);
+    try {
+      const response = await authAPI.login(credentials);
+      localStorage.setItem("authToken", response.data.token);
+      setUser(response.data.user);
 
-    // Invalidate and refetch user data
-    queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+      // Invalidate and refetch user data
+      queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
 
-    return response;
+      return response;
+    } catch (error) {
+      // Clear any invalid tokens on login failure
+      localStorage.removeItem("authToken");
+      setUser(null);
+      throw error;
+    }
   };
 
   // Register function
   const register = async (userData) => {
-    const response = await authAPI.register(userData);
-    localStorage.setItem("authToken", response.data.token);
-    setUser(response.data.user);
+    try {
+      const response = await authAPI.register(userData);
+      localStorage.setItem("authToken", response.data.token);
+      setUser(response.data.user);
 
-    // Invalidate and refetch user data
-    queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+      // Invalidate and refetch user data
+      queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
 
-    return response;
+      return response;
+    } catch (error) {
+      // Clear any invalid tokens on registration failure
+      localStorage.removeItem("authToken");
+      setUser(null);
+      throw error;
+    }
   };
 
   // Logout function
@@ -69,7 +83,8 @@ export const AuthProvider = ({ children }) => {
     try {
       await authAPI.logout();
     } catch (error) {
-      console.error("Logout error:", error);
+      // Silently handle logout errors
+      console.warn("Logout API error:", error?.message || error);
     } finally {
       // Clear token and user data regardless of API response
       localStorage.removeItem("authToken");
@@ -82,23 +97,33 @@ export const AuthProvider = ({ children }) => {
 
   // Update user profile
   const updateProfile = async (userData) => {
-    const response = await authAPI.updateDetails(userData);
-    setUser(response.data.user);
+    try {
+      const response = await authAPI.updateDetails(userData);
+      setUser(response.data.user);
 
-    // Invalidate user queries
-    queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+      // Invalidate user queries
+      queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
 
-    return response;
+      return response;
+    } catch (error) {
+      console.error("Profile update error:", error?.message || error);
+      throw error;
+    }
   };
 
   // Update password
   const updatePassword = async (passwordData) => {
-    const response = await authAPI.updatePassword(passwordData);
+    try {
+      const response = await authAPI.updatePassword(passwordData);
 
-    // Invalidate user queries
-    queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+      // Invalidate user queries
+      queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
 
-    return response;
+      return response;
+    } catch (error) {
+      console.error("Password update error:", error?.message || error);
+      throw error;
+    }
   };
 
   const value = {

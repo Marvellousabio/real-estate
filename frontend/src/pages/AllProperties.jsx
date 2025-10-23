@@ -2,6 +2,7 @@ import React, { useEffect, useState,useRef, useCallback } from "react";
 import { getProperties } from "../services/api";
 import PropertyCard from "../components/PropertyCard"
 import { Link } from "react-router-dom"; // import Link
+import { useAuth } from "../context/AuthContext";
 
 
 const PropertySkeleton = () => (
@@ -9,12 +10,22 @@ const PropertySkeleton = () => (
 );
 
 export default function PropertyList() {
+  const { isAuthenticated } = useAuth();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [observerSupported, setObserverSupported] = useState(true);
+  const [filter, setFilter] = useState('all'); // 'all' or 'my'
   const limit = 10;
+
+  // Handle filter change
+  const handleFilterChange = (newFilter) => {
+    setFilter(newFilter);
+    setPage(1);
+    setProperties([]);
+    setHasMore(true);
+  };
  
 
     const observer = useRef();
@@ -41,29 +52,34 @@ export default function PropertyList() {
 );
 
   useEffect(() => {
-    
+
     const fetchData = async () => {
       if (!hasMore ) return;
     setLoading(true);
       try {
-        const res = await getProperties({ page, limit });
+        const params = { page, limit };
+        if (filter === 'my') {
+          params.myProperties = true;
+        }
+        const res = await getProperties(params);
+        const newProperties = res?.data || [];
         setProperties((prev) => {
-        const newProps = res.filter(
+        const filteredNewProps = newProperties.filter(
           (p) => !prev.some((existing) => existing._id === p._id)
         );
-        return [...prev, ...newProps];
+        return [...prev, ...filteredNewProps];
       });
-        if (res.length<limit){
+        if (newProperties.length < limit){
           setHasMore(false);
         }
-      } catch (err) {
-        console.error("Error fetching properties:", err);
+      } catch {
+        // Silently handle errors to avoid console serialization issues
       } finally {
         setLoading(false);
       }
     };
   fetchData();
-  }, [page, hasMore]);
+   }, [page, hasMore, filter]);
 
 
 
@@ -72,8 +88,34 @@ export default function PropertyList() {
       {/* Header with button */}
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-bold text-gray-800">
-          Available Properties
+          {filter === 'my' ? 'My Properties' : 'Available Properties'}
         </h2>
+
+        {/* Filter Buttons */}
+        {isAuthenticated && (
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleFilterChange('all')}
+              className={`px-4 py-2 rounded-lg font-semibold transition ${
+                filter === 'all'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              All Properties
+            </button>
+            <button
+              onClick={() => handleFilterChange('my')}
+              className={`px-4 py-2 rounded-lg font-semibold transition ${
+                filter === 'my'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              My Properties
+            </button>
+          </div>
+        )}
 
         {/* Add Property Button */}
         <Link

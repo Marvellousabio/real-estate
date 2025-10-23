@@ -27,8 +27,6 @@ export const AddProperty = () => {
     images: [],
   });
 
-  const CLOUD_NAME = import.meta.env.VITE_CLOUD_NAME;
-  const UPLOAD_PRESET = import.meta.env.VITE_UPLOAD_PRESET;
 
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
@@ -85,54 +83,6 @@ export const AddProperty = () => {
     setFiles(prev => prev.filter((_, index) => index !== indexToRemove));
   }, []);
 
-  const uploadImages = useCallback(async () => {
-    if (files.length === 0) {
-      showAlert("Please upload at least one image.", "error");
-      return [];
-    }
-
-    if (!CLOUD_NAME || !UPLOAD_PRESET) {
-      showAlert("Cloudinary configuration missing.", "error");
-      return [];
-    }
-
-    setUploading(true);
-    try {
-      const uploadPromises = files.map(async (file) => {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("upload_preset", UPLOAD_PRESET);
-
-        const response = await fetch(
-          `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-          {
-            method: "POST",
-            body: formData
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`Upload failed for ${file.name}: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-        if (result.error) {
-          throw new Error(result.error.message);
-        }
-
-        return result.secure_url;
-      });
-
-      const urls = await Promise.all(uploadPromises);
-      return urls;
-    } catch (error) {
-      console.error("Upload error:", error);
-      showAlert(`Image upload failed: ${error.message}`, "error");
-      return [];
-    } finally {
-      setUploading(false);
-    }
-  }, [files, CLOUD_NAME, UPLOAD_PRESET, showAlert]);
 
     
 
@@ -150,23 +100,28 @@ export const AddProperty = () => {
       return;
     }
 
+    setUploading(true);
     try {
-      const imageUrls = await uploadImages();
-      if (imageUrls.length === 0) return;
+      // Create FormData for multipart upload
+      const formDataToSend = new FormData();
 
-      const payload = {
-        ...formData,
-        title: formData.title.trim(),
-        description: formData.description.trim(),
-        location: formData.location.trim(),
-        price: Number(formData.price),
-        bedrooms: Number(formData.bedrooms) || 0,
-        bathrooms: Number(formData.bathrooms) || 0,
-        size: Number(formData.size),
-        images: imageUrls,
-      };
+      // Add form fields
+      formDataToSend.append("title", formData.title.trim());
+      formDataToSend.append("description", formData.description.trim());
+      formDataToSend.append("location", formData.location.trim());
+      formDataToSend.append("price", Number(formData.price));
+      formDataToSend.append("bedrooms", Number(formData.bedrooms) || 0);
+      formDataToSend.append("bathrooms", Number(formData.bathrooms) || 0);
+      formDataToSend.append("size", Number(formData.size));
+      formDataToSend.append("type", formData.type);
+      formDataToSend.append("category", formData.category);
 
-      const response = await createProperty(payload);
+      // Add image files
+      files.forEach((file) => {
+        formDataToSend.append("images", file);
+      });
+
+      const response = await createProperty(formDataToSend);
 
       if (response?.data) {
         showAlert("Property added successfully!", "success");
@@ -194,8 +149,10 @@ export const AddProperty = () => {
         error.response?.data?.error || "Failed to add property. Please try again.",
         "error"
       );
+    } finally {
+      setUploading(false);
     }
-  }, [formData, uploadImages, showAlert]);
+  }, [formData, files, showAlert]);
 
 
   return (
@@ -371,7 +328,7 @@ export const AddProperty = () => {
         />
       </svg>
       <span className="text-gray-600">
-        Click to <span className="text-green-600 font-semibold">Upload</span> or drag & drop
+        Click to <span className="text-green-600 font-semibold">Upload<FaCloudUploadAlt/></span> or drag & drop
       </span>
       <span className="text-sm text-gray-400">PNG, JPG up to 5 files</span>
     </label>

@@ -118,7 +118,7 @@ const Header = () => {
   );
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-lg">
+    <header className="fixed top-0 left-0 right-0 z-50  shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between bg-white h-16 rounded-2xl px-4 shadow-sm">
           {/* Logo */}
@@ -137,7 +137,7 @@ const Header = () => {
           </nav>
 
           {/* Desktop Auth Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-2">
             {user ? (
               <div className="flex items-center space-x-3">
                 <div className="text-right">

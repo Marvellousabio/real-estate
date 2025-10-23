@@ -34,13 +34,13 @@ const queryClient = new QueryClient({
   },
 });
 
-// Error boundary for React Query
-queryClient.getQueryCache().config.onError = (error) => {
-  console.error('Query Error:', error);
+// Error boundary for React Query - simplified to avoid console issues
+queryClient.getQueryCache().config.onError = () => {
+  // Silently handle query errors
 };
 
-queryClient.getMutationCache().config.onError = (error) => {
-  console.error('Mutation Error:', error);
+queryClient.getMutationCache().config.onError = () => {
+  // Silently handle mutation errors
 };
 
 createRoot(document.getElementById('root')).render(

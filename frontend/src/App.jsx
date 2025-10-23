@@ -70,7 +70,7 @@ const App = () => {
                 path="/dashboard"
                 element={
                   <Suspense fallback={<LoadingSpinner />}>
-                    <ProtectedRoute>
+                    <ProtectedRoute requiredRole='user|admin|agent'>
                       <Dashboard />
                     </ProtectedRoute>
                   </Suspense>
@@ -80,7 +80,7 @@ const App = () => {
                 path="/create-blog"
                 element={
                   <Suspense fallback={<LoadingSpinner />}>
-                    <ProtectedRoute>
+                    <ProtectedRoute requiredRole="admin">
                       <CreateBlog />
                     </ProtectedRoute>
                   </Suspense>
@@ -90,7 +90,7 @@ const App = () => {
                 path="/add-property"
                 element={
                   <Suspense fallback={<LoadingSpinner />}>
-                    <ProtectedRoute>
+                    <ProtectedRoute requiredRole="agent|admin">
                       <AddProperty />
                     </ProtectedRoute>
                   </Suspense>

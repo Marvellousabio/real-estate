@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongoosePaginate from "mongoose-paginate-v2";
 
 const blogSchema = new mongoose.Schema(
   {
@@ -89,6 +90,9 @@ blogSchema.methods.incrementViews = function() {
   this.views += 1;
   return this.save();
 };
+
+// Apply the paginate plugin
+blogSchema.plugin(mongoosePaginate);
 
 const Blog = mongoose.model("Blog", blogSchema);
 

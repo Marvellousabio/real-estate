@@ -10,11 +10,14 @@ const More = () => {
   const navigate = useNavigate();
 
   // ✅ useQuery handles fetching, caching, retries
-  const { data: blogs = [], isLoading, isError } = useQuery({
+  const { data: blogsResponse, isLoading, isError } = useQuery({
     queryKey: ["blogs"],
     queryFn: getBlogs,
     staleTime: 5 * 60 * 1000, // cache for 5 minutes
   });
+
+  // Extract blogs array from response
+  const blogs = blogsResponse?.data || [];
 
   const handlePostClick = (id) => {
     navigate(`/blog/${id}`);

@@ -1,4 +1,6 @@
 import multer from "multer";
+import dotenv from "dotenv";
+dotenv.config();
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { v2 as cloudinary } from "cloudinary";
 import path from "path";
@@ -9,6 +11,8 @@ const requiredEnvVars = [
   "CLOUDINARY_API_KEY",
   "CLOUDINARY_API_SECRET"
 ];
+
+// Debug logs removed after confirming env vars are loaded
 
 const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
 if (missingVars.length > 0) {
@@ -46,6 +50,7 @@ const createBlogStorage = () => new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "real-estate/blogs",
+     upload_preset: "blog",
     allowed_formats: ["jpg", "jpeg", "png", "webp"],
     transformation: [
       { width: 1200, height: 800, crop: "limit" },

@@ -7,7 +7,8 @@ import {
   deleteBlog
 } from "../controllers/blogController.js";
 import { upload } from "../config/storage.js";
-import { protect, ownerOrAdmin } from "../middleware/auth.js";
+import { protect, authorize, ownerOrAdmin } from "../middleware/auth.js";
+import Blog from "../model/blog.js";
 
 const router = express.Router();
 
@@ -69,14 +70,14 @@ router.get("/", async (req, res, next) => {
 // GET /api/blog/:id - Get single blog by ID
 router.get("/:id", validateBlogId, getBlogById);
 
-// POST /api/blog - Create new blog (Protected)
-router.post("/", protect, upload.single("image"), createBlog);
+// POST /api/blog - Create new blog (Protected - Admin only)
+router.post("/", protect, authorize("admin"), upload.single("image"), createBlog);
 
-// PUT /api/blog/:id - Update blog (Protected - Owner or Admin)
-router.put("/:id", validateBlogId, protect, ownerOrAdmin("author"), upload.single("image"), updateBlog);
+// PUT /api/blog/:id - Update blog (Protected - Admin only)
+router.put("/:id", validateBlogId, protect, authorize("admin"), upload.single("image"), updateBlog);
 
-// DELETE /api/blog/:id - Delete blog (Protected - Owner or Admin)
-router.delete("/:id", validateBlogId, protect, ownerOrAdmin("author"), deleteBlog);
+// DELETE /api/blog/:id - Delete blog (Protected - Admin only)
+router.delete("/:id", validateBlogId, protect, authorize("admin"), deleteBlog);
 
 // GET /api/blog/slug/:slug - Get blog by slug
 router.get("/slug/:slug", async (req, res, next) => {

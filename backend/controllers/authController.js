@@ -5,26 +5,31 @@ import { protect } from "../middleware/auth.js";
 // @route   POST /api/auth/register
 // @access  Public
 export const register = async (req, res, next) => {
+  console.log("🔄 Register endpoint called with data:", { name: req.body.name, email: req.body.email, hasPassword: !!req.body.password });
   try {
     const { name, email, password, phone, role } = req.body;
 
     // Validation
     if (!name || !email || !password) {
+      console.log("❌ Validation failed: missing required fields");
       return res.status(400).json({
         success: false,
         error: "Please provide name, email, and password"
       });
     }
 
+    console.log("🔍 Checking if user exists...");
     // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      console.log("❌ User already exists:", email);
       return res.status(400).json({
         success: false,
         error: "User already exists with this email"
       });
     }
 
+    console.log("👤 Creating new user...");
     // Create user
     const user = await User.create({
       name,
@@ -34,6 +39,7 @@ export const register = async (req, res, next) => {
       role: role || "user"
     });
 
+    console.log("🔑 Generating auth token...");
     // Generate token
     const token = user.generateAuthToken();
 
@@ -48,6 +54,7 @@ export const register = async (req, res, next) => {
       createdAt: user.createdAt
     };
 
+    console.log("✅ Registration successful for:", email);
     res.status(201).json({
       success: true,
       message: "User registered successfully",
@@ -57,6 +64,7 @@ export const register = async (req, res, next) => {
       }
     });
   } catch (error) {
+    console.error("❌ Registration error:", error);
     next(error);
   }
 };

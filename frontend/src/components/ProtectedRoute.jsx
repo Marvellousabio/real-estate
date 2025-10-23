@@ -3,7 +3,8 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { authAPI } from "../services/api";
 
-const ProtectedRoute = ({ children, requiredRole = null }) => {
+const ProtectedRoute = ({ children, requiredRole }) => {
+  console.log("ProtectedRoute: Component rendered with requiredRole:", requiredRole, "type:", typeof requiredRole);
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -13,20 +14,29 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
     queryFn: authAPI.getMe,
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    onError: () => {
-      // Clear invalid token
+    onError: (error) => {
+      console.log("ProtectedRoute: Query error:", error?.response?.status, error?.message);
+      // Clear invalid token on auth errors - silently
       localStorage.removeItem("authToken");
+      // Don't log the error to avoid console serialization issues
+    },
+    onSuccess: (data) => {
+      console.log("ProtectedRoute: Query success, userData structure:", data ? Object.keys(data) : "null");
     },
   });
 
   useEffect(() => {
+    console.log("ProtectedRoute: useEffect triggered, queryLoading:", queryLoading);
     if (!queryLoading) {
       setIsLoading(false);
     }
   }, [queryLoading]);
 
+  console.log("ProtectedRoute: isLoading:", isLoading, "isError:", isError, "userData:", userData ? "present" : "null");
+
   // Show loading spinner while checking authentication
   if (isLoading) {
+    console.log("ProtectedRoute: Showing loading spinner");
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
@@ -36,13 +46,16 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
 
   // If authentication failed, redirect to sign in
   if (isError || !userData?.data?.user) {
+    console.log("ProtectedRoute: Authentication failed, redirecting to signin. isError:", isError, "userData?.data?.user:", userData?.data?.user);
     return <Navigate to="/signin" state={{ from: location }} replace />;
   }
 
   const user = userData.data.user;
+  console.log("ProtectedRoute: User authenticated, user object:", user, "user.role:", user.role, "type:", typeof user.role);
 
   // Check role-based access if required
-  if (requiredRole && user.role !== requiredRole && user.role !== "admin") {
+  if (requiredRole && String(user.role) !== requiredRole && String(user.role) !== "admin") {
+    console.log("ProtectedRoute: Access denied. Required role:", requiredRole, "type:", typeof requiredRole, "User role:", user.role, "type:", typeof user.role);
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -61,6 +74,7 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
     );
   }
 
+  console.log("ProtectedRoute: Rendering children (AddProperty page)");
   // User is authenticated and has required permissions
   return children;
 };
