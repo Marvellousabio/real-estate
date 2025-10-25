@@ -7,28 +7,53 @@ const router = express.Router();
 
 // Validation middleware
 const validatePropertyData = (req, res, next) => {
-  const { title, type, category, location, price, size } = req.body;
+   const { title, type, category, location, price, size } = req.body;
 
-  const errors = [];
+   const errors = [];
 
-  if (!title?.trim()) errors.push("Title is required");
-  if (!type) errors.push("Property type is required");
-  if (!category || !["rent", "sell"].includes(category)) {
-    errors.push("Valid category (rent/sell) is required");
-  }
-  if (!location?.trim()) errors.push("Location is required");
-  if (!price || price < 0) errors.push("Valid price is required");
-  if (!size || size <= 0) errors.push("Valid size is required");
+   if (!title?.trim()) errors.push("Title is required");
+   if (!type) errors.push("Property type is required");
+   if (!category || !["rent", "sell"].includes(category)) {
+     errors.push("Valid category (rent/sell) is required");
+   }
+   if (!location?.trim()) errors.push("Location is required");
+   if (!price || price < 0) errors.push("Valid price is required");
+   if (!size || size <= 0) errors.push("Valid size is required");
 
-  if (errors.length > 0) {
-    return res.status(400).json({
-      success: false,
-      error: "Validation failed",
-      details: errors
-    });
-  }
+   if (errors.length > 0) {
+     return res.status(400).json({
+       success: false,
+       error: "Validation failed",
+       details: errors
+     });
+   }
 
-  next();
+   next();
+};
+
+// Helper function to parse location string into nested object
+const parseLocation = (locationString) => {
+   // Split by comma and clean up
+   const parts = locationString.split(',').map(part => part.trim());
+
+   // Default structure
+   const location = {
+     address: '',
+     city: '',
+     state: '',
+     country: 'Nigeria',
+     coordinates: {
+       type: 'Point',
+       coordinates: [3.3792, 6.5244] // Default to Lagos
+     }
+   };
+
+   if (parts.length >= 1) location.address = parts[0];
+   if (parts.length >= 2) location.city = parts[1];
+   if (parts.length >= 3) location.state = parts[2];
+   if (parts.length >= 4) location.country = parts[3];
+
+   return location;
 };
 
 // GET /api/properties - Get properties with advanced filtering and pagination
@@ -114,9 +139,14 @@ router.get("/", async (req, res, next) => {
       query.type = type.toLowerCase();
     }
 
-    // Location filter (case-insensitive partial match)
+    // Location filter (search across nested location fields)
     if (location) {
-      query.location = new RegExp(location.trim(), "i");
+      query.$or = [
+        { 'location.address': new RegExp(location.trim(), "i") },
+        { 'location.city': new RegExp(location.trim(), "i") },
+        { 'location.state': new RegExp(location.trim(), "i") },
+        { 'location.country': new RegExp(location.trim(), "i") }
+      ];
     }
 
     // Price range filter
@@ -153,7 +183,9 @@ router.get("/", async (req, res, next) => {
       query.$or = [
         { title: new RegExp(search.trim(), "i") },
         { description: new RegExp(search.trim(), "i") },
-        { location: new RegExp(search.trim(), "i") },
+        { 'location.address': new RegExp(search.trim(), "i") },
+        { 'location.city': new RegExp(search.trim(), "i") },
+        { 'location.state': new RegExp(search.trim(), "i") },
         { type: new RegExp(search.trim(), "i") }
       ];
     }
@@ -249,115 +281,159 @@ router.get("/:id", async (req, res, next) => {
 
 // POST /api/properties - Create new property (Protected)
 router.post("/", protect, uploadPropertyImages.array("images", 10), async (req, res, next) => {
-  try {
-    // Basic validation
-    const { title, type, category, location, price, size } = req.body;
-    const errors = [];
+   try {
+     // Basic validation
+     const { title, type, category, location, price, size } = req.body;
+     const errors = [];
 
-    if (!title?.trim()) errors.push("Title is required");
-    if (!type) errors.push("Property type is required");
-    if (!category || !["rent", "sell"].includes(category)) {
-      errors.push("Valid category (rent/sell) is required");
-    }
-    if (!location?.trim()) errors.push("Location is required");
-    if (!price || price < 0) errors.push("Valid price is required");
-    if (!size || size <= 0) errors.push("Valid size is required");
+     if (!title?.trim()) errors.push("Title is required");
+     if (!type) errors.push("Property type is required");
+     if (!category || !["rent", "sell"].includes(category)) {
+       errors.push("Valid category (rent/sell) is required");
+     }
+     if (!location?.trim()) errors.push("Location is required");
+     if (!price || price < 0) errors.push("Valid price is required");
+     if (!size || size <= 0) errors.push("Valid size is required");
 
-    if (errors.length > 0) {
-      return res.status(400).json({
-        success: false,
-        error: "Validation failed",
-        details: errors
-      });
-    }
+     if (errors.length > 0) {
+       return res.status(400).json({
+         success: false,
+         error: "Validation failed",
+         details: errors
+       });
+     }
 
-    // Get uploaded image URLs from Cloudinary
-    const imageUrls = req.files ? req.files.map(file => file.path) : [];
+     // Get uploaded image URLs and public IDs from Cloudinary
+     const images = req.files ? req.files.map(file => ({
+       url: file.path,
+       publicId: file.filename,
+       isPrimary: false,
+       alt: ""
+     })) : [];
 
-    const propertyData = {
-      ...req.body,
-      title: req.body.title.trim(),
-      description: req.body.description?.trim() || "",
-      location: req.body.location.trim(),
-      images: imageUrls,
-      features: req.body.features || [],
-      user: req.user._id // Associate property with authenticated user
-    };
+     // Parse location string into nested object
+     const parsedLocation = parseLocation(req.body.location.trim());
 
-    const newProperty = new Property(propertyData);
-    const savedProperty = await newProperty.save();
+     const propertyData = {
+       title: req.body.title.trim(),
+       description: req.body.description?.trim() || "",
+       type: req.body.type,
+       category: req.body.category,
+       price: Number(req.body.price),
+       currency: req.body.currency || "NGN",
+       location: parsedLocation,
+       bedrooms: Number(req.body.bedrooms) || 0,
+       bathrooms: Number(req.body.bathrooms) || 0,
+       size: Number(req.body.size),
+       sizeUnit: req.body.sizeUnit || "sqft",
+       images: images,
+       features: req.body.features ? JSON.parse(req.body.features) : [],
+       amenities: req.body.amenities ? JSON.parse(req.body.amenities) : [],
+       status: req.body.status || "available",
+       isActive: true,
+       isFeatured: req.body.isFeatured === "true",
+       user: req.user._id // Associate property with authenticated user
+     };
 
-    // Populate user data for response
-    await savedProperty.populate('user', 'name email');
+     const newProperty = new Property(propertyData);
+     const savedProperty = await newProperty.save();
 
-    res.status(201).json({
-      success: true,
-      message: "Property created successfully",
-      data: savedProperty
-    });
-  } catch (error) {
-    next(error);
-  }
-});
+     // Populate user data for response
+     await savedProperty.populate('user', 'name email');
+
+     res.status(201).json({
+       success: true,
+       message: "Property created successfully",
+       data: savedProperty
+     });
+   } catch (error) {
+     next(error);
+   }
+ });
 
 // PUT /api/properties/:id - Update property (Protected - Owner or Admin)
-router.put("/:id", protect, async (req, res, next) => {
-  try {
-    // First, get the property to check ownership
-    const property = await Property.findById(req.params.id);
-    if (!property) {
-      return res.status(404).json({
-        success: false,
-        error: "Property not found"
-      });
-    }
+router.put("/:id", protect, uploadPropertyImages.array("images", 10), async (req, res, next) => {
+   try {
+     // First, get the property to check ownership
+     const property = await Property.findById(req.params.id);
+     if (!property) {
+       return res.status(404).json({
+         success: false,
+         error: "Property not found"
+       });
+     }
 
-    // Check if user owns the property or is admin
-    if (property.user.toString() !== req.user._id.toString() && req.user.role !== "admin") {
-      return res.status(403).json({
-        success: false,
-        error: "Not authorized to update this property"
-      });
-    }
+     // Check if user owns the property or is admin
+     if (property.user.toString() !== req.user._id.toString() && req.user.role !== "admin") {
+       return res.status(403).json({
+         success: false,
+         error: "Not authorized to update this property"
+       });
+     }
 
-    const updateData = {
-      ...req.body,
-      title: req.body.title?.trim(),
-      description: req.body.description?.trim() || "",
-      location: req.body.location?.trim(),
-      updatedAt: new Date()
-    };
+     // Handle new images if uploaded
+     let images = property.images;
+     if (req.files && req.files.length > 0) {
+       const newImages = req.files.map(file => ({
+         url: file.path,
+         publicId: file.filename,
+         isPrimary: false,
+         alt: ""
+       }));
+       images = [...images, ...newImages];
+     }
 
-    // Remove undefined fields
-    Object.keys(updateData).forEach(key => {
-      if (updateData[key] === undefined) delete updateData[key];
-    });
+     // Parse location if provided
+     let location = property.location;
+     if (req.body.location) {
+       location = parseLocation(req.body.location.trim());
+     }
 
-    const updatedProperty = await Property.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      {
-        new: true,
-        runValidators: true
-      }
-    ).select("-__v");
+     const updateData = {
+       title: req.body.title?.trim() || property.title,
+       description: req.body.description?.trim() || property.description,
+       type: req.body.type || property.type,
+       category: req.body.category || property.category,
+       price: req.body.price ? Number(req.body.price) : property.price,
+       currency: req.body.currency || property.currency,
+       location: location,
+       bedrooms: req.body.bedrooms !== undefined ? Number(req.body.bedrooms) : property.bedrooms,
+       bathrooms: req.body.bathrooms !== undefined ? Number(req.body.bathrooms) : property.bathrooms,
+       size: req.body.size ? Number(req.body.size) : property.size,
+       sizeUnit: req.body.sizeUnit || property.sizeUnit,
+       images: images,
+       features: req.body.features ? JSON.parse(req.body.features) : property.features,
+       amenities: req.body.amenities ? JSON.parse(req.body.amenities) : property.amenities,
+       status: req.body.status || property.status,
+       isFeatured: req.body.isFeatured !== undefined ? req.body.isFeatured === "true" : property.isFeatured,
+       updatedAt: new Date()
+     };
 
-    if (!updatedProperty) {
-      return res.status(404).json({
-        success: false,
-        error: "Property not found"
-      });
-    }
+     const updatedProperty = await Property.findByIdAndUpdate(
+       req.params.id,
+       updateData,
+       {
+         new: true,
+         runValidators: true
+       }
+     ).select("-__v");
 
-    res.status(200).json({
-      success: true,
-      message: "Property updated successfully",
-      data: updatedProperty
-    });
-  } catch (error) {
-    next(error);
-  }
-});
+     if (!updatedProperty) {
+       return res.status(404).json({
+         success: false,
+         error: "Property not found"
+       });
+     }
+
+     res.status(200).json({
+       success: true,
+       message: "Property updated successfully",
+       data: updatedProperty
+     });
+   } catch (error) {
+     next(error);
+   }
+ });
 
 // DELETE /api/properties/:id - Delete property (Protected - Owner or Admin)
 router.delete("/:id", protect, async (req, res, next) => {

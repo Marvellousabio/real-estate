@@ -44,14 +44,18 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     );
   }
 
+  const user = userData.data.user;
+  console.log("ProtectedRoute: User authenticated, user object:", user, "user.role:", user.role, "type:", typeof user.role);
+
+    if (!requiredRole.includes(user.role)) {
+  return <Navigate to="/unauthorized" replace />;
+}
+
   // If authentication failed, redirect to sign in
   if (isError || !userData?.data?.user) {
     console.log("ProtectedRoute: Authentication failed, redirecting to signin. isError:", isError, "userData?.data?.user:", userData?.data?.user);
     return <Navigate to="/signin" state={{ from: location }} replace />;
   }
-
-  const user = userData.data.user;
-  console.log("ProtectedRoute: User authenticated, user object:", user, "user.role:", user.role, "type:", typeof user.role);
 
   // Check role-based access if required
   if (requiredRole && String(user.role) !== requiredRole && String(user.role) !== "admin") {

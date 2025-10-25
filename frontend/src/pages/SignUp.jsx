@@ -227,7 +227,35 @@ const SignUp = () => {
                 <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
               )}
             </div>
-
+            {/* Role */}
+<div>
+  <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
+    Role
+  </label>
+  <div className="relative">
+    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      <FaUser className="h-5 w-5 text-gray-400" />
+    </div>
+    <select
+      id="role"
+      name="role"
+      value={formData.role}
+      onChange={handleChange}
+      required
+      className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${
+        errors.role ? "border-red-300" : "border-gray-300"
+      }`}
+    >
+      <option value="">Select a role</option>
+      <option value="user">User</option>
+      <option value="admin">Admin</option>
+      <option value="agent">Agent</option>
+    </select>
+  </div>
+  {errors.role && (
+    <p className="mt-1 text-sm text-red-600">{errors.role}</p>
+  )}
+</div>
             {/* Password */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">

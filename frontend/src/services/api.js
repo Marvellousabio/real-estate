@@ -172,6 +172,29 @@ export const authAPI = {
   },
 };
 
+// Favorites API
+export const favoritesAPI = {
+  addFavorite: async (propertyId) => {
+    const response = await API.post('/favorites', { propertyId });
+    return response.data;
+  },
+
+  removeFavorite: async (favoriteId) => {
+    const response = await API.delete(`/favorites/${favoriteId}`);
+    return response.data;
+  },
+
+  getFavorites: async (params = {}) => {
+    const response = await API.get('/favorites', { params });
+    return response.data;
+  },
+
+  checkFavorite: async (propertyId) => {
+    const response = await API.get(`/favorites/check/${propertyId}`);
+    return response.data;
+  },
+};
+
 // Legacy exports for backward compatibility
 export const createProperty = propertyAPI.create;
 export const getProperties = propertyAPI.getAll;

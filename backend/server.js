@@ -1,78 +1,127 @@
-import dotenv from "dotenv";
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import compression from 'compression';
+import morgan from 'morgan';
+import rateLimit from 'express-rate-limit';
+import 'express-async-errors';
+import dotenv from 'dotenv';
+
+import connectDB from './config/database.js';
+import corsConfig from './config/cors.js';
+import routes from './routes/index.js';
+import errorHandler from './middleware/errorHandler.js';
+
+// Load environment variables
 dotenv.config();
 
-import express from "express";
-import cors from "cors";
-import compression from "compression";
-import helmet from "helmet";
-import morgan from "morgan";
-import timeout from "connect-timeout";
-import mongoose from "mongoose";
-
-import propertyRoutes from "./routes/route.js";
-import blogRoutes from "./routes/blogRouter.js";
-import authRouter from "./routes/authRouter.js";
-import errorHandler from "./middleware/errorHandler.js";
-
+// Create Express app
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ---------- Middleware Configuration ----------
-app.use(compression());
-app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://real-estate-iul2.vercel.app"
-  ],
-  credentials: true,
-}));
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true }));
+// Trust proxy for rate limiting behind reverse proxy
+app.set('trust proxy', 1);
+
+// Security middleware
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      imgSrc: ["'self'", 'data:', 'https:', 'http:'],
+      scriptSrc: ["'self'"],
+    },
+  },
 }));
-app.use(morgan("combined"));
-app.use(timeout("30s"));
 
-// ---------- Database Connection ----------
-mongoose.set("strictQuery", false);
+// CORS configuration
+app.use(cors(corsConfig));
 
-const connectDB = async () => {
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: (process.env.RATE_LIMIT_WINDOW || 15) * 60 * 1000, // 15 minutes
+  max: process.env.RATE_LIMIT_MAX_REQUESTS || 100, // limit each IP to 100 requests per windowMs
+  message: {
+    success: false,
+    error: 'Too many requests from this IP, please try again later.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api/', limiter);
+
+// Body parsing middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Compression middleware
+app.use(compression());
+
+// Logging middleware
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+} else {
+  app.use(morgan('combined'));
+}
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Real Estate API is running',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+  });
+});
+
+// API routes
+app.use('/api', routes);
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    error: 'Route not found',
+  });
+});
+
+// Error handling middleware (must be last)
+app.use(errorHandler);
+
+// Connect to database and start server
+const startServer = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URL);
-    console.log("✅ MongoDB connected successfully");
+    await connectDB();
+
+    const server = app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
+      console.log(`📊 Health check: http://localhost:${PORT}/health`);
+    });
+
+    // Graceful shutdown
+    process.on('SIGTERM', () => {
+      console.log('SIGTERM received, shutting down gracefully');
+      server.close(() => {
+        console.log('Process terminated');
+        process.exit(0);
+      });
+    });
+
+    process.on('SIGINT', () => {
+      console.log('SIGINT received, shutting down gracefully');
+      server.close(() => {
+        console.log('Process terminated');
+        process.exit(0);
+      });
+    });
+
   } catch (error) {
-    console.error("❌ MongoDB connection failed:", error.message);
+    console.error('Failed to start server:', error);
     process.exit(1);
   }
 };
 
-connectDB();
-
-// ---------- Routes ----------
-app.get("/health", (req, res) => {
-  res.status(200).json({
-    status: "OK",
-    message: "Real Estate API is running 🚀",
-    timestamp: new Date().toISOString()
-  });
-});
-
-app.use("/api/auth", authRouter);
-app.use("/api/properties", propertyRoutes);
-app.use("/api/blog", blogRoutes);
-
-// ---------- Error Handling ----------
-app.use(errorHandler);
-
-// ---------- 404 Handler ----------
-app.use((req, res) => {
-  res.status(404).json({ error: "Route not found" });
-});
-
-// ---------- Start Server ----------
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/health`);
-});
+startServer();
 
