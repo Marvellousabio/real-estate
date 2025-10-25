@@ -5,6 +5,7 @@ import AnimatedCounter from '../utils/AnimatedCounter'
 import { fadeIn } from '../utils/animate'
 import PropertySearch from './PropertySearch';
 import { hero1, hero2, hero3 } from '../assets/assets';
+import { Link } from 'react-router-dom';
 
 
 
@@ -56,22 +57,37 @@ const Hero = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -50 }}
           transition={{ duration: 0.8 }}
-          className="   sm:text-4xl lg:text-7xl font-bold sm:mb-1 mb-4"//text-5xl md:text-5xl lg:text-10xl
+          className="sm:text-4xl lg:text-7xl font-bold sm:mb-1 mb-4"
         >
           {slides[current].title}
         </motion.h1>
         <motion.p
-  key={`subtitle-${current}`}
-  initial={{ opacity: 0, y: 30 }}
-  animate={{ opacity: 1, y: 0 }}
-  exit={{ opacity: 0, y: -30 }}
-  transition={{ duration: 1 }}
-  className="text-4xl sm:text-2xl sm:mb-10 mb-6"
->
-  {slides[current].subtitle}
-</motion.p>
-        
-        
+          key={`subtitle-${current}`}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -30 }}
+          transition={{ duration: 1 }}
+          className="text-4xl sm:text-2xl sm:mb-10 mb-6"
+        >
+          {slides[current].subtitle}
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+          className="flex flex-col sm:flex-row gap-4 items-center justify-center"
+        >
+          <Link to="/all-properties">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg shadow-lg transition-all duration-300"
+            >
+              Find Your Dream Home
+            </motion.button>
+          </Link>
+        </motion.div>
       </div>
       
       </motion.div>

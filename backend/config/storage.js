@@ -44,6 +44,19 @@ const imageFilter = (req, file, cb) => {
   }
 };
 
+// Create storage engine for blog images
+const blogImageStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'real-estate/blogs',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    transformation: [
+      { width: 800, height: 600, crop: 'limit' },
+      { quality: 'auto' },
+    ],
+  },
+});
+
 // Create multer upload instances
 export const uploadPropertyImages = multer({
   storage: propertyImageStorage,
@@ -51,6 +64,15 @@ export const uploadPropertyImages = multer({
   limits: {
     fileSize: parseInt(process.env.MAX_FILE_SIZE) || 5242880, // 5MB default
     files: parseInt(process.env.MAX_FILES_PER_UPLOAD) || 10,
+  },
+});
+
+export const upload = multer({
+  storage: blogImageStorage,
+  fileFilter: imageFilter,
+  limits: {
+    fileSize: 5242880, // 5MB for blog images
+    files: 1,
   },
 });
 

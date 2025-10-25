@@ -14,7 +14,7 @@ const Footer = () => {
         viewport={{ once: true, amount: 0.1 }}
         className=" mx-auto"
       >
-        <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+        <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
           {/* Company Info */}
           <div className="space-y-6">
             <div className="flex items-center space-x-3">
@@ -37,14 +37,38 @@ const Footer = () => {
             </div>
           </div>
 
+          {/* Newsletter */}
+          <div className="space-y-6">
+            <h5 className="text-lg font-semibold text-white">Newsletter</h5>
+            <p className="text-[var(--light-gray)] opacity-80 leading-relaxed">
+              Subscribe to get the latest property updates and market insights.
+            </p>
+            <form className="space-y-3">
+              <input
+                type="email"
+                placeholder="Your email address"
+                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                required
+              />
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                type="submit"
+                className="w-full bg-[var(--accent)] text-white px-4 py-2 rounded-lg hover:bg-[var(--hover-accent)] transition-colors duration-300"
+              >
+                Subscribe
+              </motion.button>
+            </form>
+          </div>
+
           {/* Quick Links */}
           <div className="space-y-6">
             <h5 className="text-lg font-semibold text-white">Quick Links</h5>
             <ul className="space-y-3">
-              <li><a href="#" className="text-[var(--light-gray)] hover:text-[var(--accent)] transition-colors duration-300">About Us</a></li>
-              <li><a href="#" className="text-[var(--light-gray)] hover:text-[var(--accent)] transition-colors duration-300">Properties</a></li>
-              <li><a href="#" className="text-[var(--light-gray)] hover:text-[var(--accent)] transition-colors duration-300">Services</a></li>
-              <li><a href="#" className="text-[var(--light-gray)] hover:text-[var(--accent)] transition-colors duration-300">Testimonials</a></li>
+              <li><a href="#home" className="text-[var(--light-gray)] hover:text-[var(--accent)] transition-colors duration-300">Home</a></li>
+              <li><a href="#properties" className="text-[var(--light-gray)] hover:text-[var(--accent)] transition-colors duration-300">Properties</a></li>
+              <li><a href="#agents" className="text-[var(--light-gray)] hover:text-[var(--accent)] transition-colors duration-300">Agents</a></li>
+              <li><a href="#contact" className="text-[var(--light-gray)] hover:text-[var(--accent)] transition-colors duration-300">Contact</a></li>
             </ul>
           </div>
 

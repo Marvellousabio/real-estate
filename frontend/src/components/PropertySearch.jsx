@@ -36,7 +36,7 @@ const PropertySearch = () => {
 
   return (
     <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 w-full max-w-5xl px-4 z-25">
-      <div className="bg-white shadow-2xl rounded-2xl p-4 sm:p-6 ">
+      <div className="bg-white shadow-2xl rounded-2xl p-4 sm:p-6 border">
         
         {/* Tabs */}
         <div className="relative flex space-x-8 border-b pb-3 mb-6 justify-between ">
@@ -48,15 +48,15 @@ const PropertySearch = () => {
               onClick={() => setActiveTab(tab)}
               className={`capitalize font-semibold pb-0.4 transition ${
                 activeTab === tab
-                  ? "border-b-1 border-green-600 text-green-600"
-                  : "text-gray-500 hover:text-green-600"
+                  ? "border-b-1 border-blue-600 text-blue-600"
+                  : "text-gray-500 hover:text-blue-600"
               }`}
             >
               {tab}
             </button>
             {/* Blinking dot under Sell only */}
       {tab === "agent" && (
-        <div className="inline-block w-1.5 h-1.5  bg-green-600 rounded-full ml-1 animate-blink align-bottom"></div>
+        <div className="inline-block w-1.5 h-1.5  bg-blue-600 rounded-full ml-1 animate-blink align-bottom"></div>
       )}
       </div>
           ))}
@@ -71,12 +71,12 @@ const PropertySearch = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search properties..."
-           className="right-0 w-0 opacity-0 transition-all duration-300 border-b border-green-600 focus:outline-none group-hover:w-48 group-hover:opacity-100 px-2 ml-auto"
+           className="right-0 w-0 opacity-0 transition-all duration-300 border-b border-blue-600 focus:outline-none group-hover:w-48 group-hover:opacity-100 px-2 ml-auto"
       
           />
          <button
           onClick={handleSearch}
-          className="text-green-600 hover:text-green-800 transition ml-2 z-10
+          className="text-blue-600 hover:text-blue-800 transition ml-2 z-10
 "           
           
           onMouseEnter={() => inputRef.current?.focus()}
@@ -97,7 +97,7 @@ const PropertySearch = () => {
               <select
               value={propertyType}
               onChange={(e)=>setPropertyType(e.target.value)}
-              className="border  rounded-lg  pl-10 pr-4 py-2 sm:py-3 w-full focus:ring-2 focus:ring-green-600">
+              className="border rounded-lg pl-10 pr-4 py-2 sm:py-3 w-full focus:ring-2 focus:ring-blue-600">
                 <option>Property Type</option>
                 <option>Duplex</option>
                 <option>Bungalow</option>
@@ -114,7 +114,7 @@ const PropertySearch = () => {
                 placeholder="Location"
                 value={location}
                 onChange={(e)=>setLocation(e.target.value)}
-                className="border rounded-lg pl-10 pr-4 py-2 sm:py-3 w-full focus:ring-2 focus:ring-green-600"
+                className="border rounded-lg pl-10 pr-4 py-2 sm:py-3 w-full focus:ring-2 focus:ring-blue-600"
               />
             </div>
 
@@ -126,7 +126,7 @@ const PropertySearch = () => {
                 placeholder="Min Price"
                 value={minPrice}
                 onChange={(e)=>setMinPrice(e.target.value)}
-                className="border rounded-lg pl-10 pr-4 py-2 sm:py-3 w-full focus:ring-2 focus:ring-green-600"
+                className="border rounded-lg pl-10 pr-4 py-2 sm:py-3 w-full focus:ring-2 focus:ring-blue-600"
               />
             </div>
 
@@ -138,14 +138,14 @@ const PropertySearch = () => {
                 placeholder="Max Price"
                 value={maxPrice}
                 onChange={(e)=>setMaxPrice(e.target.value)}
-                className="border rounded-lg pl-10 pr-4 py-2 sm:py-3 w-full focus:ring-2 focus:ring-green-600"
+                className="border rounded-lg pl-10 pr-4 py-2 sm:py-3 w-full focus:ring-2 focus:ring-blue-600"
               />
             </div>
 
             {/* Search Button */}
             <button 
             onClick={handleSearch}
-            className=" bg-green-600 text-white font-semibold rounded-lg py-2 sm:py-3 w-full md:w-auto  hover:bg-green-700 transition">
+            className=" bg-blue-600 text-white font-semibold rounded-lg py-2 sm:py-3 w-full md:w-auto  hover:bg-blue-700 transition">
               Search
             </button>
           </div>
@@ -161,7 +161,7 @@ const PropertySearch = () => {
                 placeholder="Location"
                 value={location}
                 onChange={(e)=>setLocation(e.target.value)}
-                className="border rounded-lg pl-10 pr-4 py-2 sm:py-3 w-full focus:ring-2 focus:ring-green-600"
+                className="border rounded-lg pl-10 pr-4 py-2 sm:py-3 w-full focus:ring-2 focus:ring-blue-600"
               />
             </div>
 
@@ -171,7 +171,7 @@ const PropertySearch = () => {
               <select
               value={propertyType }
               onChange={(e)=>setPropertyType(e.target.value)}
-              className="border rounded-lg pl-10 pr-4 py-2 sm:py-3 w-full focus:ring-2 focus:ring-green-600">
+              className="border rounded-lg pl-10 pr-4 py-2 sm:py-3 w-full focus:ring-2 focus:ring-blue-600">
                 <option>Property Type</option>
                 <option>Apartment</option>
                 <option>Studio</option>
@@ -187,14 +187,14 @@ const PropertySearch = () => {
                 placeholder="Max Budget"
                 value={maxPrice}
                 onChange={(e)=>setMaxPrice(e.target.value)}
-                className="border rounded-lg pl-10 pr-4 py-3 w-full focus:ring-2 focus:ring-green-600"
+                className="border rounded-lg pl-10 pr-4 py-3 w-full focus:ring-2 focus:ring-blue-600"
 
               />
             </div>
 
             <button
             onClick={handleSearch}
-             className="bg-green-600 text-white font-semibold rounded-lg py-2 sm:py-3 w-full md:w-auto  hover:bg-green-700 transition">
+             className="bg-blue-600 text-white font-semibold rounded-lg py-2 sm:py-3 w-full md:w-auto  hover:bg-blue-700 transition">
               Search
             </button>
           </div>
@@ -209,7 +209,7 @@ const PropertySearch = () => {
               <select
               value={propertyType}
               onChange={(e)=>setPropertyType(e.target.value)}
-              className="border rounded-lg pl-10 pr-4 py-3 w-full focus:ring-2 focus:ring-green-600">
+              className="border rounded-lg pl-10 pr-4 py-3 w-full focus:ring-2 focus:ring-blue-600">
                 <option>Property Type</option>
                 <option>Duplex</option>
                 <option>Bungalow</option>
@@ -225,13 +225,13 @@ const PropertySearch = () => {
                 placeholder="Property Location"
                 value={location}
                 onChange={(e)=>setLocation(e.target.value)}
-                className="border rounded-lg pl-10 pr-4 py-3 w-full focus:ring-2 focus:ring-green-600"
+                className="border rounded-lg pl-10 pr-4 py-3 w-full focus:ring-2 focus:ring-blue-600"
               />
             </div>
 
             <button
             onClick={addProperty}
-            className="bg-green-600 text-white font-semibold rounded-lg py-2 sm:py-3 w-full md:w-auto  hover:bg-green-700 transition">
+            className="bg-blue-600 text-white font-semibold rounded-lg py-2 sm:py-3 w-full md:w-auto  hover:bg-blue-700 transition">
               List Property
             </button>
           </div>

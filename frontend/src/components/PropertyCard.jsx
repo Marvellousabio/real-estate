@@ -38,8 +38,8 @@ const PropertyCard = memo(React.forwardRef(({ property }, ref) => {
 
   if (!property) {
     return (
-      <div ref={ref} className="bg-white shadow-lg rounded-xl overflow-hidden border animate-pulse">
-        <div className="h-40 bg-gray-200"></div>
+      <div ref={ref} className="bg-[var(--card-background)] shadow-md rounded-lg overflow-hidden animate-pulse" style={{ width: '300px', height: '400px' }}>
+        <div className="h-48 bg-gray-200"></div>
         <div className="p-5 space-y-3">
           <div className="h-6 bg-gray-200 rounded"></div>
           <div className="h-4 bg-gray-200 rounded w-3/4"></div>
@@ -52,7 +52,8 @@ const PropertyCard = memo(React.forwardRef(({ property }, ref) => {
   return (
     <div
       ref={ref}
-      className="bg-white shadow-lg rounded-xl overflow-hidden border hover:shadow-xl transition-all duration-300 group"
+      className="bg-[var(--card-background)] shadow-md rounded-lg overflow-hidden hover:shadow-lg hover:scale-105 transition-all duration-300 group"
+      style={{ width: '300px', height: '400px' }}
     >
       {/* Image Section */}
       <div className="relative h-48 bg-gray-100 overflow-hidden">
@@ -114,33 +115,33 @@ const PropertyCard = memo(React.forwardRef(({ property }, ref) => {
 
       {/* Details Section */}
       <div className="p-5">
-        <h3 className="text-xl font-semibold text-gray-800 mb-2 line-clamp-2 hover:text-green-600 transition-colors">
+        <h3 className="text-lg font-semibold text-[var(--primary)] mb-2 line-clamp-2 hover:text-[var(--accent)] transition-colors">
           {property.title || "Untitled Property"}
         </h3>
 
-        <p className="text-gray-600 mb-3 flex items-center text-sm">
+        <p className="text-[var(--primary)] opacity-70 mb-3 flex items-center text-sm">
           <span className="mr-1">📍</span>
           {property.location || "Location not specified"}
         </p>
 
         <div className="mb-4">
-          <p className="text-green-700 font-bold text-lg flex items-center gap-1">
+          <p className="text-[var(--accent)] font-bold text-lg flex items-center gap-1">
             <FaNairaSign style={{ fontWeight: "bold", opacity: 0.9 }} />
             {formatPrice(property.price)}
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 text-sm text-gray-600">
+        <div className="grid grid-cols-3 gap-2 text-sm text-[var(--primary)] opacity-70">
           <div className="flex items-center gap-1">
-            <FaBed className="text-green-600" />
+            <FaBed className="text-[var(--accent)]" />
             <span>{property.bedrooms ?? 0} Bed{property.bedrooms !== 1 ? 's' : ''}</span>
           </div>
           <div className="flex items-center gap-1">
-            <FaBath className="text-green-600" />
+            <FaBath className="text-[var(--accent)]" />
             <span>{property.bathrooms ?? 0} Bath{property.bathrooms !== 1 ? 's' : ''}</span>
           </div>
           <div className="flex items-center gap-1">
-            <FaRulerCombined className="text-green-600" />
+            <FaRulerCombined className="text-[var(--accent)]" />
             <span>{property.size ? `${property.size} sqft` : "N/A"}</span>
           </div>
         </div>

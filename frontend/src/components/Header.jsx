@@ -18,9 +18,8 @@ const Header = () => {
   const sections = useMemo(() => [
     { name: 'home', path: '/', isHashLink: true },
     { name: 'properties', path: '/all-properties', isHashLink: false },
-    { name: 'about', path: '/about', isHashLink: false },
-    { name: 'services', path: '/services', isHashLink: false },
-    { name: 'more', path: '/more', isHashLink: false },
+    { name: 'agents', path: '/agents', isHashLink: false },
+    { name: 'blog', path: '/blog', isHashLink: false },
     { name: 'contact', path: '/contact', isHashLink: false },
   ], []);
 
@@ -30,9 +29,8 @@ const Header = () => {
     const sectionMap = {
       '/': 'home',
       '/all-properties': 'properties',
-      '/about': 'about',
-      '/services': 'services',
-      '/more': 'more',
+      '/agents': 'agents',
+      '/blog': 'blog',
       '/contact': 'contact'
     };
     setActiveSection(sectionMap[path] || 'home');
@@ -93,7 +91,8 @@ const Header = () => {
               }`}
               onClick={handleCloseMenu}
             >
-              {section.name === 'about' ? 'About Us' :
+              {section.name === 'agents' ? 'Agents' :
+               section.name === 'blog' ? 'Blog' :
                section.name.charAt(0).toUpperCase() + section.name.slice(1)}
             </HashLink>
           ) : (
@@ -108,7 +107,8 @@ const Header = () => {
               }`}
               onClick={handleCloseMenu}
             >
-              {section.name === 'about' ? 'About Us' :
+              {section.name === 'agents' ? 'Agents' :
+               section.name === 'blog' ? 'Blog' :
                section.name.charAt(0).toUpperCase() + section.name.slice(1)}
             </Link>
           )}

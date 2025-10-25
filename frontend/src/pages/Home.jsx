@@ -1,9 +1,11 @@
 // Home.jsx
 import React from 'react';
 import Hero from '../components/Hero';
-import Property from '../components/Property';
+import PropertyForSale from '../components/PropertyForSale';
+import PropertyForRent from '../components/PropertyForRent';
+import PropertyTopPicks from '../components/PropertyTopPicks';
 import About from '../components/About';
-import Showcase from '../components/Showcase';
+import Testimonials from '../components/Testimonials';
 import More from '../components/More';
 import Contact from '../components/Contact';
 
@@ -11,9 +13,11 @@ const Home = () => {
   return (
     <>
       <Hero />
-      <Property />
+      <PropertyForSale />
+      <PropertyForRent />
+      <PropertyTopPicks />
       <About />
-      <Showcase />
+      <Testimonials />
       <More />
       <Contact />
     </>
